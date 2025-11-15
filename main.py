@@ -13,12 +13,15 @@ pygame.display.set_caption("Smart Ways To Die")
 player_img = pygame.image.load("images/happy.png")
 player_img = pygame.transform.scale(player_img, (40, 40))
 player = pygame.Rect(100, 100, 40, 40)  # keep this for collision/movement
-grass_img = pygame.image.load("images/grass.jpeg")
+
 
 roomWidth = 300
 roomHeight = 200
 doorSize = 50
 wallWidth = 10
+
+grass_img = pygame.image.load("images/grass.jpeg")
+grass_area = pygame.transform.scale(grass_img, (roomWidth, roomHeight))
 
 assetWidth = 70
 assetHeight = 120
@@ -105,6 +108,11 @@ def setRoom():
         (50, 50)
     )
 
+    toilet_img = pygame.transform.scale(
+        pygame.image.load("images/toilet.png"),
+        (assetWidth, assetHeight-20)
+    )
+
     kitchen_img = pygame.image.load("images/kitchen.png")
     kitchen_img = pygame.transform.scale(kitchen_img, (assetWidth + 50, assetHeight + 50))
     kitchen_img = pygame.transform.rotate(kitchen_img, 90)
@@ -138,13 +146,13 @@ def setRoom():
         walls.append(pygame.Rect(x, y, w, h))
 
 
-    wall_color = (120, 120, 120)
+    wall_color = (0, 0, 0)
 
-    return (floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,
+    return (floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,toilet_img,
             walls, wall_color)
 
 # Load room setup
-(floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,
+(floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,toilet_img,
  walls, wall_color) = setRoom()
 
 
@@ -168,12 +176,22 @@ coffee_table_rect = coffee_table_img.get_rect(topleft=(WINDOW_WIDTH//4, WINDOW_H
 desk_rect = desk_img.get_rect(topleft=(roomWidth - assetWidth, 0))
 kitchen_rect = kitchen_img.get_rect(topleft=(WINDOW_WIDTH - assetHeight - 50, WINDOW_HEIGHT - assetWidth - 50 - wallWidth))
 bonfire_rect = bonfire_img.get_rect(topleft=(WINDOW_WIDTH//2, wallWidth))
+toilet_rect = toilet_img.get_rect(topleft=(2*roomWidth + wallWidth, wallWidth))
 
 collidables = walls
 interactive_objects = [(coffee_table_rect, "Coffee intoxication?"),
                        (desk_rect, "Midterm prep?"),
                        (kitchen_rect, "Freeze to death?"),
-                       (bonfire_rect, "Burn yourself?")]
+                       (bonfire_rect, "Burn yourself?"),
+                       (toilet_rect, "Flush your head?")]
+
+dangerScores = {
+    "Coffee intoxication?": 6,
+    "Midterm prep?": 15,
+    "Freeze to death?": 10,
+    "Burn yourself?": 10,
+    "Flush your head?": 5
+}
 
 
 clock = pygame.time.Clock()
@@ -286,7 +304,8 @@ while running:
             popup_active = True
             choice = popup(msg, "Yes", "No")
             if choice:
-                add_points(5)
+                point = dangerScores.get(msg, 0)
+                add_points(point)
             while player.colliderect(int_obj):
                 player.y += 1
             popup_active = False
@@ -294,13 +313,14 @@ while running:
     # Draw floor
     screen.blit(floor, (0, 0))
 
-    # screen.blit(grass_area, (rect_x, rect_y))
+    screen.blit(grass_area, (roomWidth+wallWidth, 0))
 
     # Draw objects
     screen.blit(coffee_table_img, (WINDOW_WIDTH//4, WINDOW_HEIGHT//2 ))
     screen.blit(desk_img, (roomWidth-assetWidth, 0))
     screen.blit(kitchen_img, (WINDOW_WIDTH - assetHeight-50, WINDOW_HEIGHT-assetWidth-50-wallWidth))
     screen.blit(bonfire_img, (WINDOW_WIDTH//2, wallWidth))
+    screen.blit(toilet_img, (2*roomWidth+wallWidth, wallWidth))
 
     # Draw player
     screen.blit(player_img, player.topleft)
