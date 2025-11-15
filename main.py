@@ -27,6 +27,14 @@ score = 0
 font = pygame.font.Font(None, 36)
 bigfont = pygame.font.Font(None, 72)
 
+def reset_game():
+    global player, score, running, startTime
+
+    player = pygame.Rect(100, 100, 40, 40)
+    score = 0
+    running = True
+    startTime = pygame.time.get_ticks()
+
 
 #start screen
 def startScreen():
@@ -203,6 +211,8 @@ while running:
             player.y += player_speed
 
 
+    if keys[pygame.K_r]:
+        reset_game()
 
 
     # Draw floor
