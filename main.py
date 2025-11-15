@@ -11,9 +11,9 @@ screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Smart Ways To Die")
 
 player_img = pygame.image.load("images/happy.png")
-player_img = pygame.transform.scale(player_img, (40, 40))  # match your current player size
+player_img = pygame.transform.scale(player_img, (40, 40))
 player = pygame.Rect(100, 100, 40, 40)  # keep this for collision/movement
-
+grass_img = pygame.image.load("images/grass.jpeg")
 
 roomWidth = 300
 roomHeight = 200
@@ -169,14 +169,82 @@ desk_rect = desk_img.get_rect(topleft=(roomWidth - assetWidth, 0))
 kitchen_rect = kitchen_img.get_rect(topleft=(WINDOW_WIDTH - assetHeight - 50, WINDOW_HEIGHT - assetWidth - 50 - wallWidth))
 bonfire_rect = bonfire_img.get_rect(topleft=(WINDOW_WIDTH//2, wallWidth))
 
-collidables = walls + [coffee_table_rect, desk_rect, kitchen_rect, bonfire_rect]
+collidables = walls
+interactive_objects = [(coffee_table_rect, "Coffee intoxication?"),
+                       (desk_rect, "Midterm prep?"),
+                       (kitchen_rect, "Freeze to death?"),
+                       (bonfire_rect, "Burn yourself?")]
 
 
 clock = pygame.time.Clock()
 
+#pop up loop
+def popup(message, option1="Yes", option2="No"):
+    popWidth, popHeight = 400, 200
+    popup_rect = pygame.Rect(
+        (WINDOW_WIDTH - popWidth) // 2,
+        (WINDOW_HEIGHT - popHeight) // 2,
+        popWidth,
+        popHeight
+    )
+
+    #button rects
+    btnWidth, btnHeight = 100, 50
+    btn1_rect = pygame.Rect(
+        popup_rect.x + 50,
+        popup_rect.y + popHeight - btnHeight - 20,
+        btnWidth,
+        btnHeight
+    )
+    btn2_rect = pygame.Rect(
+        popup_rect.x + popWidth - btnWidth - 50,
+        popup_rect.y + popHeight - btnHeight - 20,
+        btnWidth,
+        btnHeight
+    )
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if btn1_rect.collidepoint(event.pos):
+                    return True
+                elif btn2_rect.collidepoint(event.pos):
+                    return False
+
+
+
+        # Draw popup
+        pygame.draw.rect(screen, (200, 200, 200), popup_rect)
+        pygame.draw.rect(screen, (0, 0, 0), popup_rect, 2)
+
+        # Draw buttons
+        pygame.draw.rect(screen, (100, 200, 100), btn1_rect)
+        pygame.draw.rect(screen, (200, 100, 100), btn2_rect)
+
+        # Button text
+        btn_font = pygame.font.Font("pixelfont.ttf", 32)
+        btn1_text = btn_font.render(option1, True, (0, 0, 0))
+        btn2_text = btn_font.render(option2, True, (0, 0, 0))
+        screen.blit(btn1_text, btn1_text.get_rect(center=btn1_rect.center))
+        screen.blit(btn2_text, btn2_text.get_rect(center=btn2_rect.center))
+
+        # Message text
+        msg_font = pygame.font.Font("pixelfont.ttf", 36)
+        msg_text = msg_font.render(message, True, (0, 0, 0))
+        screen.blit(msg_text, msg_text.get_rect(center=(popup_rect.centerx, popup_rect.y + 60)))
+
+        pygame.display.flip()
+        clock.tick(30)
+
+
+
 # Main loop
 running = True
-
+popup_active = False #to check for first collision
 #game loop
 startScreen()
 startTime = pygame.time.get_ticks() #to start timer after player presses space bar
@@ -184,11 +252,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = event.pos  # (x, y) tuple
-            if bonfire_rect.collidepoint(mouse_pos):
-                add_points(5)
 
 
     keys = pygame.key.get_pressed()
@@ -215,8 +278,23 @@ while running:
         reset_game()
 
 
+    for int_obj, msg in interactive_objects:
+        #second better option
+        #if not player.colliderect(int_obj):
+         #   x, y = player.x, player.y
+        if player.colliderect(int_obj) and not popup_active:
+            popup_active = True
+            choice = popup(msg, "Yes", "No")
+            if choice:
+                add_points(5)
+            while player.colliderect(int_obj):
+                player.y += 1
+            popup_active = False
+
     # Draw floor
     screen.blit(floor, (0, 0))
+
+    # screen.blit(grass_area, (rect_x, rect_y))
 
     # Draw objects
     screen.blit(coffee_table_img, (WINDOW_WIDTH//4, WINDOW_HEIGHT//2 ))
