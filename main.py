@@ -88,7 +88,7 @@ def add_points(amount):
 def setRoom():
     # Load & scale images
     floor = pygame.transform.scale(
-        pygame.image.load("images/floor.jpg"),
+        pygame.image.load("images/floor.webp"),
         (WINDOW_WIDTH, WINDOW_HEIGHT)
     )
 
@@ -108,9 +108,21 @@ def setRoom():
         (50, 50)
     )
 
-    toilet_img = pygame.transform.scale(
+    bath_img = pygame.transform.scale(
         pygame.image.load("images/toilet.png"),
-        (assetWidth-20, assetHeight-30)
+        (assetWidth-20, assetHeight)
+    )
+    cactus_img = pygame.transform.scale(
+        pygame.image.load("images/cactus.png"),
+        (assetWidth-40, assetHeight-40)
+    )
+    tv_img = pygame.transform.scale(
+        pygame.image.load("images/cabinet.png"),
+        (assetWidth+50, assetHeight)
+    )
+    wire_img = pygame.transform.scale(
+        pygame.image.load("images/cable.png"),
+        (assetWidth-30, assetHeight-60)
     )
 
     kitchen_img = pygame.image.load("images/kitchen.png")
@@ -148,11 +160,11 @@ def setRoom():
 
     wall_color = (0, 0, 0)
 
-    return (floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,toilet_img,
+    return (floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,bath_img,cactus_img, tv_img, wire_img,
             walls, wall_color)
 
 # Load room setup
-(floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,toilet_img,
+(floor, desk_img, coffee_table_img,kitchen_img,bonfire_img,bath_img,cactus_img, tv_img, wire_img,
  walls, wall_color) = setRoom()
 
 
@@ -176,21 +188,30 @@ coffee_table_rect = coffee_table_img.get_rect(topleft=(WINDOW_WIDTH//4, WINDOW_H
 desk_rect = desk_img.get_rect(topleft=(roomWidth - assetWidth, 0))
 kitchen_rect = kitchen_img.get_rect(topleft=(WINDOW_WIDTH - assetHeight - 50, WINDOW_HEIGHT - assetWidth - 50 - wallWidth))
 bonfire_rect = bonfire_img.get_rect(topleft=(WINDOW_WIDTH//2, wallWidth))
-toilet_rect = toilet_img.get_rect(topleft=(2*roomWidth + wallWidth, wallWidth))
+bath_rect = bath_img.get_rect(topleft=(2*roomWidth + wallWidth, wallWidth))
+cactus_rect = cactus_img.get_rect(topleft=(wallWidth, roomHeight + wallWidth))
+tv_rect = tv_img.get_rect(topleft=(roomWidth//2, WINDOW_HEIGHT-70))
+wire_rect = wire_img.get_rect(topleft=( wallWidth, WINDOW_HEIGHT - assetHeight - wallWidth))
 
 collidables = walls
 interactive_objects = [(coffee_table_rect, "Coffee intoxication?"),
                        (desk_rect, "Midterm prep?"),
                        (kitchen_rect, "Freeze to death?"),
                        (bonfire_rect, "Burn yourself?"),
-                       (toilet_rect, "Flush your head?")]
+                       (bath_rect, "Drown your head?"),
+                       (cactus_rect, "Prick yourself?"),
+                       (wire_rect, "Electrocution?"),
+                       (tv_rect, "Watch brainrot?")]
 
 dangerScores = {
     "Coffee intoxication?": 6,
     "Midterm prep?": 15,
     "Freeze to death?": 10,
     "Burn yourself?": 10,
-    "Flush your head?": 5
+    "Drown your head?": 8,
+    "Prick yourself?": 8,
+    "Electrocution?": 10,
+    "Watch brainrot?": 5
 }
 
 
@@ -318,7 +339,10 @@ while running:
     screen.blit(desk_img, (roomWidth-assetWidth, 0))
     screen.blit(kitchen_img, (WINDOW_WIDTH - assetHeight-50, WINDOW_HEIGHT-assetWidth-50-wallWidth))
     screen.blit(bonfire_img, (WINDOW_WIDTH//2, wallWidth))
-    screen.blit(toilet_img, (2*roomWidth+wallWidth, wallWidth))
+    screen.blit(bath_img, (2*roomWidth+wallWidth, wallWidth))
+    screen.blit(cactus_img, (wallWidth, roomHeight + wallWidth))
+    screen.blit(tv_img, (roomWidth//2, WINDOW_HEIGHT - assetHeight))
+    screen.blit(wire_img, (wallWidth, WINDOW_HEIGHT - assetHeight - wallWidth))
 
     # Draw player
     screen.blit(player_img, player.topleft)
