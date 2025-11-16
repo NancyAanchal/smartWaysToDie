@@ -25,5 +25,5 @@ Watch the gameplay demo here:
 2. Install Pygame:  
    ```bash
    pip install pygame
-    git clone https://github.com/yourusername/smartWaysToDie.git
+    git clone https://github.com/danelbakyt/smartWaysToDie.git
     python main.py
